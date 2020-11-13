@@ -29,5 +29,6 @@ public class Member {
         this.phone = phone;
     }
  
-}// end of class
+}
+// end of class
 

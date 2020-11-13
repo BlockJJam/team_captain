@@ -6,5 +6,8 @@ public interface MemberDAO {
  
     public ArrayList<Member> getMembers();
 
+	ArrayList<Member> getLoginMember();
+    
+
 }
 
