@@ -13,5 +13,9 @@
     <select id="getMembers" resultMap="MemberResultMap">
         SELECT * FROM user
     </select>
-
+    
+    <select id="getLoginMemeber" resultMap="MemberResultMap">
+    	SELECT * FROM user
+    </select>
+    
 </mapper>
