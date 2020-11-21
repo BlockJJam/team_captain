@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+	<mapper namespace="com.study.web.mapper.signUpMapper">
+	
+  	<select id="chkDuplicateUserId" resultType="int">
+		SELECT COUNT(user_seq)
+		  FROM tbl_user
+		 WHERE user_id = #{user_id}
+  	</select>
+  	
+
+	<!-- 
+		회원가입
+	 -->
+  	<insert id="insertUser" parameterType="com.study.web.vo.SignUpDTO">
+		INSERT INTO tbl_user ( user_id ,user_kr_name ,user_en_name ,user_phone_nbr ,user_password	
+		                             ,user_dept ,user_mail ,user_birth ,user_addr ,user_del		
+		                             ,user_level ,user_reg_id ,user_reg_date ,user_atamp)		
+							VALUES ( #{user_id}		,#{user_kr_name}	,#{user_en_name}	,#{user_phone_nbr}		,#{user_password}
+									,#{user_dept}	,#{user_mail}		,#{user_birth}		,#{user_addr}			,#{user_del}
+									,#{user_level}	,#{user_reg_id}		,now()				,0)
+  	</insert>
+  	
+  	<!-- 
+  		회원정보 조회(List)
+  	 -->  	
+  	<select id="selectUserList" parameterType="com.study.web.vo.SignUpDTO" resultType="com.study.web.vo.SignUpDTO">
+		SELECT  ur.user_seq 		,ur.user_id 	,ur.user_kr_name 	,ur.user_en_name 	,ur.user_phone_nbr
+		       ,ur.user_password 	,ur.user_dept 	,ur.user_mail 		,ur.user_birth 		,ur.user_addr		
+		       ,ur.user_del 		,ur.user_level  ,ur.user_reg_id 	,ur.user_reg_date 	,ur.user_update_id	
+		       ,ur.user_update		,ur.user_atamp	,dept.dept_name
+		  FROM tbl_user ur
+		  JOIN tbl_dept AS dept 
+			ON ur.user_dept = dept.dept_seq
+		<include refid="search"></include>
+		 ORDER BY ur.user_reg_date DESC, ur.user_level DESC
+		 LIMIT #{pageNum}, #{pageSize} 	
+	</select>
+  	
+  	<!-- 
+  		검색 쿼리 조각
+  	 -->
+  	<sql id="search">
+  		<choose>
+  			<!-- 검색 옵션이 전체 검색일 경우 -->
+  			<when test="search_option == 'all'">
+  				WHERE user_id LIKE CONCAT('%',#{keyword},'%')
+  				OR user_kr_name LIKE CONCAT('%',#{keyword},'%')
+  				OR dept_name LIKE CONCAT('%',#{keyword},'%')
+  			</when>
+  			<!-- 전체 검색이 아닐 경우 -->
+  			<otherwise>
+  				WHERE ${search_option} LIKE CONCAT('%',#{keyword},'%')
+  			</otherwise>
+  		</choose>
+  	</sql>
+  	
+  	<!-- 
+  		회원정보 조회(VO)
+  	 -->
+	<select id="selectUserBySeq" parameterType="com.study.web.vo.SignUpDTO" resultType="com.study.web.vo.SignUpDTO">
+		SELECT  user_seq ,user_id ,user_kr_name ,user_en_name ,user_phone_nbr 
+		        ,user_password ,user_dept ,user_mail ,user_birth ,user_addr		
+		       ,user_del ,user_level ,user_reg_id ,user_reg_date ,user_update_id	
+		       ,user_update	,user_atamp, dept_name
+		  FROM tbl_user ur
+		  JOIN tbl_dept AS dept 
+			ON ur.user_dept = dept.dept_seq
+ 		 WHERE user_seq = #{user_seq}
+ 	</select>
+  	  	
+  	
+	<!-- 
+	회원 로그인 시도 정보 초기화
+	회원 번호
+	 -->
+	<update id="resetLoginCnt" parameterType="com.study.web.vo.SignUpDTO" >
+		UPDATE tbl_user
+		SET user_atamp = 0
+		   ,user_update = now()
+		   ,user_update_id = #{user_id}
+		WHERE user_seq = #{user_seq}       	
+	</update>
+	
+	<!-- 
+	회원 탈퇴 처리
+	회원 번호, 회원 아이디
+	 -->
+	<update id="changeStatusDel" parameterType="com.study.web.vo.SignUpDTO">
+		UPDATE tbl_user
+		SET user_del = 1
+		   ,user_update = now()
+		   ,user_update_id = #{user_id}
+		WHERE user_seq = #{user_seq}                              
+	</update>
+    	
+	<!-- 
+		회원정보 수정
+		부서,  직급,  상태,  비밀번호1, 비밀번호2, 한글이름, 영문이름, 주소, 업데이트자, 업데이트 날짜
+	 -->
+   <update id="updateUser" parameterType="com.study.web.vo.SignUpDTO">
+      UPDATE tbl_user
+      SET user_kr_name = #{user_kr_name}    ,user_en_name = #{user_en_name} ,user_phone_nbr = #{user_phone_nbr} ,user_password = #{user_password}       
+      
+        <choose>
+           <when test="user_dept == 0">
+           </when>
+           <otherwise>
+            ,user_dept=#{user_dept} 
+           </otherwise>
+        </choose>
+      
+        <choose>
+           <when test="user_level == 0">
+           </when>
+           <otherwise>
+            ,user_level=#{user_level} 
+           </otherwise>
+        </choose>      
+      ,user_addr=#{user_addr}          ,user_update_id = #{user_update_id}   ,user_update = now()
+      WHERE user_seq = #{user_seq}
+   </update>
+
+	
+	
+	<select id="selectDeptNameList" resultType="com.study.web.vo.SignUpDTO">
+		SELECT dept_seq, dept_name
+		  FROM tbl_dept
+	</select>
+	
+	<select id="selectLevelNameList" resultType="com.study.web.vo.SignUpDTO">
+		SELECT level_seq, level_name
+		  FROM tbl_level_sample
+	</select>
+  	
+  	<select id="checkUserAuth" parameterType="com.study.web.vo.SignUpDTO" resultType="com.study.web.vo.SignUpDTO">
+		SELECT user_seq, user_dept, user_level
+		  FROM tbl_user
+		 WHERE user_seq = #{user_seq} 
+ 	</select>
+</mapper>

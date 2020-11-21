@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+     PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="bbs">
+	
+	<!-- 게시글 목록 조회 SQL-->
+	<select id="getbbsList" resultType="com.study.web.vo.BbsVO">
+		select * from tbl_bbs where bbs_del_yn = 'n'
+	</select>
+	
+	<!-- 게시글 입력 SQL -->
+	<insert id="insertbbs" parameterType="com.study.web.vo.BbsVO">
+		INSERT INTO	tbl_bbs (bbs_writer, dept_seq, bbs_title, bbs_contents, bbs_reg_date,bbs_cnt,bbs_del_yn,bbs_update_id,bbs_update,dept_name)
+		VALUES(#{bbs_writer}, #{dept_seq}, #{bbs_title} ,#{bbs_contents}, now(), 0, "N", null, null, #{dept_name})
+	</insert>
+	
+	<!-- 부서 조회 SQL -->
+	<select id="getdeptList" resultType="com.study.web.vo.DeptVO">
+		SELECT * FROM tbl_dept
+	</select>
+	
+	<!-- 게시글 상세보기 SQL -->
+	<select id="getbbs" parameterType="int" resultType="com.study.web.vo.BbsVO">
+		select * from tbl_bbs where bbs_seq=#{bbs_seq}
+	</select>
+	
+	<!-- 게시글 삭제 SQL -->
+	<update id="delbbs" parameterType="int">
+		UPDATE tbl_bbs SET bbs_del_yn = 'y' WHERE bbs_seq = #{bbs_seq}
+	</update>
+	
+	<!-- 조회수 증가 SQL -->
+	<update id="cntup" parameterType="int">
+		UPDATE tbl_bbs SET bbs_cnt = bbs_cnt+1 WHERE bbs_seq = #{bbs_seq}
+	</update>
+	
+	<!-- 자신의 게시 글 수정 SQL -->
+	<update id="bbsupdate" parameterType="com.study.web.vo.BbsVO">
+		UPDATE tbl_bbs set bbs_title=#{bbs_title}, bbs_contents=#{bbs_contents},bbs_update_id=#{bbs_update_id},bbs_update=now(), dept_seq=#{dept_seq}, dept_name=#{dept_name}
+		WHERE bbs_seq=#{bbs_seq}  
+	</update>
+	
+	<!-- 부서별 게시글 목록 조회 SQL-->
+	<select id="deptList" parameterType="int" resultType="com.study.web.vo.BbsVO">
+		select * from tbl_bbs 
+		where bbs_del_yn = 'n' and dept_seq=#{dept_seq}
+	</select>
+	
+	
+</mapper>

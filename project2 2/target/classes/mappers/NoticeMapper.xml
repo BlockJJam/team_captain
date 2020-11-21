@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="notice">
+	
+	<!-- 공지사항 리스트 -->
+	<select id ="selectBoardList" parameterType="hashmap" resultType="hashmap">
+			SELECT 
+			N.notice_seq,
+			N.notice_title,
+			N.dept_seq,
+			N.notice_contents,
+			N.notice_reg_date,
+			N.notice_reg_id,
+			D.dept_name
+			FROM TBL_NOTICE AS N
+			JOIN
+			TBL_DEPT AS D
+			ON
+			N.dept_seq = D.dept_seq
+			WHERE
+			N.NOTICE_DEL_NY=0
+			<choose>
+				<when test="dept_seq != 1">
+					AND N.DEPT_SEQ=#{dept_seq}
+				</when>
+			</choose>
+			ORDER BY
+			N.NOTICE_REG_DATE DESC
+	</select>
+	
+	<!-- 공지사항 삽입 -->
+	<insert id="insertNotice" parameterType="hashmap">
+		INSERT INTO TBL_NOTICE
+		(
+		DEPT_SEQ,
+		NOTICE_TITLE,
+		NOTICE_CONTENTS,
+		NOTICE_REG_ID,
+		NOTICE_REG_DATE,
+		NOTICE_DEL_NY,
+		NOTICE_UPDATE,
+		NOTICE_UPDATE_ID
+		)
+		VALUES
+		(
+		#{dept_seq},
+		#{notice_title},
+		#{notice_contents},
+		#{notice_reg_id},
+		NOW(),
+		FALSE,
+		NULL,
+		NULL
+		)
+	</insert>
+	
+	<update id="updateNotice" parameterType="hashmap">
+		UPDATE TBL_NOTICE
+		SET
+		DEPT_SEQ=#{dept_seq},
+		NOTICE_TITLE=#{notice_title},
+		NOTICE_CONTENTS=#{notice_contents},
+		NOTICE_UPDATE_ID=#{notice_update_id},
+		NOTICE_UPDATE=NOW()
+		WHERE
+		NOTICE_SEQ=#{notice_seq}
+	</update>
+	
+	<update id="deleteNotice" parameterType="int">
+		UPDATE TBL_NOTICE
+		SET
+		NOTICE_UPDATE=NOW(),
+		NOTICE_UPDATE_ID=#{notice_update_id},
+		NOTICE_DEL_NY=#{notice_del_ny}
+		WHERE
+		NOTICE_SEQ=#{notice_seq}
+	</update>
+	
+	<select id="selectNoticeDetail" parameterType="hashmap" resultType="noticeVo">
+		SELECT * 
+		FROM TBL_NOTICE
+		WHERE
+		NOTICE_DEL_NY=FALSE
+		AND
+		NOTICE_SEQ=#{notice_seq}
+	</select>
+	
+	<select id="searchNoticeList" parameterType="hashmap" resultType="hashmap">
+		SELECT *
+		FROM TBL_NOTICE
+		WHERE
+		NOTICE_DEL_NY=FALSE
+		<choose>
+			<when test="dept_seq != 1">
+				AND DEPT_SEQ=#{dept_seq}
+			</when>
+		</choose>
+		<choose>
+			<when test="notice_category == 0">
+				AND NOTICE_REG_ID LIKE CONCAT('%',#{notice_search_word},'%')
+			</when>
+			<when test="notice_category == 1">
+				AND NOTICE_TITLE LIKE CONCAT('%',#{notice_search_word}, '%')
+			</when>
+		</choose>
+		ORDER BY
+		NOTICE_REG_DATE DESC
+	</select>
+	
+</mapper>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+     PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+
+<mapper namespace="com.test.web.LoginMapper">
+	
+	
+	<select id="loginCheck" resultType="String" parameterType="com.study.web.vo.User">
+		<![CDATA[
+		SELECT user_id
+		FROM tbl_user_sample
+		WHERE user_id = #{user_id} AND user_password = #{user_password}
+		]]>
+    </select>
+    
+	<select id="idCheck" resultType="String" parameterType="com.study.web.vo.User">
+    	SELECT user_id
+    	FROM tbl_user_sample
+    	WHERE user_id =#{user_id}
+    </select>
+	
+	<select id="viewUser" resultType="com.study.web.vo.loginUser" parameterType="com.study.web.vo.User">
+        SELECT 
+            user_id, user_atamp, user_dept, user_kr_name,user_seq, user_level
+        FROM tbl_user_sample
+        WHERE user_id = #{user_id} AND user_password = #{user_password}
+    </select>
+    
+	<select id="passwordSearch" resultType="String" parameterType="com.study.web.vo.User">
+		SELECT
+			user_password
+		FROM tbl_user_sample
+		WHERE user_id =#{user_id} AND user_mail =#{user_mail}
+	</select>
+	
+	<select id="idSearch" resultType="String" parameterType="com.study.web.vo.User">
+		SELECT
+			user_id
+		FROM tbl_user_sample
+		WHERE user_kr_name = #{user_kr_name} AND user_mail = #{user_mail}
+	</select>
+
+</mapper>
+
+
+
